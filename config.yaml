@@ -1,0 +1,18 @@
+server:
+  port: 8888
+  bind: "0.0.0.0"
+  timeout: 10
+
+logging:
+  access_log: true
+  debug: false
+
+routes:
+  - path: "/api/*"
+    target: "https://jsonplaceholder.typicode.com"
+  - path: "/static/*"
+    target: "https://cdn.jsdelivr.net"
+  - path: "/health"
+    target: "https://httpbin.org/status/200"
+  - path: "/echo/*"
+    target: "https://httpbin.org"
