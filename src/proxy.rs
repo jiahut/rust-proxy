@@ -1,4 +1,5 @@
 use std::convert::Infallible;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::time::timeout;
 use hyper::service::{make_service_fn, service_fn};
@@ -10,13 +11,13 @@ use crate::error::ProxyError;
 
 pub struct ProxyServer {
     config: Config,
-    router: Router,
+    router: Arc<Router>,
     client: Client<hyper_rustls::HttpsConnector<hyper::client::HttpConnector>>,
 }
 
 impl ProxyServer {
-    pub fn new(config: Config) -> Self {
-        let router = Router::new(&config);
+    pub fn new(config: Config) -> Result<Self, ProxyError> {
+        let router = Arc::new(Router::new(&config)?);
         
         // 创建HTTPS客户端，不验证证书
         let https = HttpsConnectorBuilder::new()
@@ -27,11 +28,11 @@ impl ProxyServer {
         let client = Client::builder()
             .build::<_, hyper::Body>(https);
         
-        ProxyServer {
+        Ok(ProxyServer {
             config,
             router,
             client,
-        }
+        })
     }
     
     pub async fn run(self, listener: TcpListener) -> Result<(), ProxyError> {
@@ -64,7 +65,7 @@ impl ProxyServer {
         Ok(())
     }
     
-    async fn handle_request(&self, req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    async fn handle_request(&self, mut req: Request<Body>) -> Result<Response<Body>, Infallible> {
         let method = req.method().clone();
         let uri = req.uri().clone();
         let path = uri.path();
@@ -78,11 +79,11 @@ impl ProxyServer {
             println!("Handling request: {} {}", method, path);
         }
         
-        // 查找路由
-        let (_target_base, target_url) = match self.router.find_route(path) {
+        // 查找路由并执行token校验
+        let (_target_base, target_url) = match self.router.find_route_and_validate(path, &mut req) {
             Ok((base, url)) => (base, url),
             Err(e) => {
-                println!("Route not found for {}: {}", path, e);
+                println!("Route not found or validation failed for {}: {}", path, e);
                 return Ok(e.into());
             }
         };
@@ -154,7 +155,7 @@ impl Clone for ProxyServer {
     fn clone(&self) -> Self {
         ProxyServer {
             config: self.config.clone(),
-            router: Router::new(&self.config),
+            router: Arc::clone(&self.router),
             client: self.client.clone(),
         }
     }

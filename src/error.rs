@@ -9,6 +9,7 @@ pub enum ProxyError {
     UrlParseError(url::ParseError),
     TimeoutError,
     InternalError(String),
+    Unauthorized(String),
 }
 
 impl std::fmt::Display for ProxyError {
@@ -23,6 +24,7 @@ impl std::fmt::Display for ProxyError {
             ProxyError::UrlParseError(e) => write!(f, "URL parse error: {}", e),
             ProxyError::TimeoutError => write!(f, "Timeout error"),
             ProxyError::InternalError(msg) => write!(f, "Internal server error: {}", msg),
+            ProxyError::Unauthorized(msg) => write!(f, "Unauthorized: {}", msg),
         }
     }
 }
@@ -56,6 +58,7 @@ impl From<ProxyError> for hyper::Response<hyper::Body> {
             ProxyError::TimeoutError => (StatusCode::GATEWAY_TIMEOUT, "Request timeout"),
             ProxyError::NetworkError(_) => (StatusCode::BAD_GATEWAY, "Network error"),
             ProxyError::HttpError(_) => (StatusCode::BAD_REQUEST, "HTTP error"),
+            ProxyError::Unauthorized(_) => (StatusCode::UNAUTHORIZED, "Unauthorized"),
             _ => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
         };
         

@@ -28,6 +28,13 @@ pub struct LoggingConfig {
 pub struct RouteConfig {
     pub path: String,
     pub target: String,
+    pub token_validation: Option<TokenValidationConfig>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TokenValidationConfig {
+    pub verified_token: Vec<String>,
+    pub qualified_token: Vec<String>,
 }
 
 #[derive(Parser, Debug)]

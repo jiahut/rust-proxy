@@ -5,6 +5,7 @@ mod config;
 mod proxy;
 mod router;
 mod error;
+mod token_validator;
 
 use config::Config;
 use proxy::ProxyServer;
@@ -29,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Proxy server listening on {}", addr);
     
     // 创建代理服务器
-    let server = ProxyServer::new(config);
+    let server = ProxyServer::new(config)?;
     
     // 启动服务器
     server.run(listener).await?;

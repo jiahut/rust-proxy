@@ -8,11 +8,27 @@ logging:
   debug: false
 
 routes:
+  # Route with token validation - requires Bearer token
   - path: "/api/*"
     target: "https://jsonplaceholder.typicode.com"
+    token_validation:
+      verified_token: ["token01", "token02", "dev-token-123"]  # Allowed input tokens
+      qualified_token: ["prod-token-456"]                      # Token to use for backend requests
+  
+  # Route with different token validation
+  - path: "/secure/*"
+    target: "https://httpbin.org"
+    token_validation:
+      verified_token: ["admin-token", "manager-token"]
+      qualified_token: ["backend-admin-token"]
+  
+  # Public routes without token validation
   - path: "/static/*"
     target: "https://cdn.jsdelivr.net"
+    # No token_validation means no authentication required
+  
   - path: "/health"
     target: "https://httpbin.org/status/200"
+  
   - path: "/echo/*"
     target: "https://httpbin.org"
