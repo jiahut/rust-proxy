@@ -51,8 +51,8 @@ impl From<url::ParseError> for ProxyError {
 
 impl From<ProxyError> for hyper::Response<hyper::Body> {
     fn from(err: ProxyError) -> Self {
-        use hyper::{Response, Body, StatusCode};
-        
+        use hyper::{Body, Response, StatusCode};
+
         let (status, message) = match err {
             ProxyError::RouteError(_) => (StatusCode::NOT_FOUND, "Route not found"),
             ProxyError::TimeoutError => (StatusCode::GATEWAY_TIMEOUT, "Request timeout"),
@@ -61,7 +61,7 @@ impl From<ProxyError> for hyper::Response<hyper::Body> {
             ProxyError::Unauthorized(_) => (StatusCode::UNAUTHORIZED, "Unauthorized"),
             _ => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
         };
-        
+
         Response::builder()
             .status(status)
             .body(Body::from(message))

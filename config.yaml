@@ -7,6 +7,21 @@ logging:
   access_log: true
   debug: false
 
+strip_headers:
+  - "cf-connecting-ip"
+  - "cf-connecting-ipv6"
+  - "cf-ew-via"
+  - "cf-ipcountry"
+  - "cf-ray"
+  - "cf-visitor"
+  - "cf-warp-request-id"
+  - "cf-worker"
+  - "cf-worker-bot"
+  - "cf-warp-tag-id"
+  - "x-forwarded-for"
+  - "x-forwarded-proto"
+  - "x-original-forwarded-for"
+
 routes:
   # Route with token validation - requires Bearer token
   - path: "/api/*"

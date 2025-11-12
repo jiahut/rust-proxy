@@ -11,6 +11,7 @@
 - **流式传输**: 支持流式数据传输
 - **灵活配置**: 支持YAML配置文件和命令行参数
 - **完整日志**: 访问日志和调试日志支持
+- **可控伪装**: 通过 `strip_headers` 配置移除 Cloudflared/反向代理追加的外网特征头
 
 ## 📦 安装
 
@@ -45,6 +46,11 @@ server:
 logging:
   access_log: true    # 启用访问日志
   debug: false        # 启用调试日志
+strip_headers:        # 代理转发前需要剥离的请求头
+  - "cf-connecting-ip"
+  - "cf-ray"
+  - "cf-visitor"
+  - "x-forwarded-for"
 
 routes:
   - path: "/api/*"                           # 路由路径（支持通配符）
